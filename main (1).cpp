@@ -1,194 +1,209 @@
 #include <bits/stdc++.h>
 using namespace std;
-class Bankaccount
-{
-private:
-	int Accnumber;
-	string name;
-	double balance;
+
+// Base class for Bank Accounts
+class BankAccount {
+protected:
+    int Accnumber;
+    string name;
+    double balance;
+
 public:
-	Bankaccount(string n,int Acc,double bal)
-	{
-		name=n;
-		Accnumber=Acc;
-		balance=bal;
-	}
-	string getname()
-	{
-		return name;
-	}
-	int getAccnumber()
-	{
-		return Accnumber;
-	}
-	double getbalance()
-	{
-		return balance;
-	}
-	void deposit(double deposit)
-	{
-		balance= balance+deposit;
-	}
-	void withdraw( double withdraw)
-	{
-		if(balance>withdraw) {
-			balance= balance-withdraw;
-			cout<<"\t\t--Withdraw successfully--";
-		}
-		else {
-			cout<<"\t\t--Insufficient balance--";
-		}
-	}
+    BankAccount(string n, int Acc, double bal)
+        : name(n), Accnumber(Acc), balance(bal) {}
 
+    virtual ~BankAccount() {}  // Virtual destructor
+
+    string getname() const {
+        return name;
+    }
+    int getAccnumber() const {
+        return Accnumber;
+    }
+    double getbalance() const {
+        return balance;
+    }
+    void deposit(double amount) {
+        balance += amount;
+    }
+    virtual void withdraw(double amount) = 0;  // Pure virtual function
 };
-class Bankmanagement
-{
-private:
-	vector<Bankaccount> accounts;
+
+// Derived class for Saving Account
+class SavingAccount : public BankAccount {
 public:
-	void addaccount(string name,int Accnumber,double balance)
-	{
-		accounts.push_back(Bankaccount(name,Accnumber,balance));
-	}
-	void Showallacc()
-	{
-		cout<<"\t\tAll accounts:"<<endl;
-		for(int i=0; i<accounts.size(); i++)
-		{
-			cout<<"\t\tName:"<<accounts[i].getname()<<endl;
-			cout<<"\t\tAccount number"<<accounts[i].getAccnumber()<<endl;
-			cout<<"\t\tAccount balance"<<accounts[i].getbalance()<<endl;
-			cout<<"\t--------------------------------";
-		}
-	}
-	void SearchACC(int accountnum)
-	{
-		cout<<"\t\tAccount Holder"<<endl;
-		for(int i=0; i<accounts.size(); i++)
-		{
-			if(accounts[i].getAccnumber()==accountnum)
-			{
-				cout<<"\t\tName:"<<accounts[i].getname()<<endl;
-				cout<<"\t\tAccount number"<<accounts[i].getAccnumber()<<endl;
-				cout<<"\t\tAccount balance"<<accounts[i].getbalance()<<endl;
-			}
-			else {
-				cout<<"\t\t--No account number available--";
-			}
-		}
-	}
-	Bankaccount* findaccount(int Acc)
-	{
-		for(int i=0; i<accounts.size(); i++)
-		{
-			if(accounts[i].getAccnumber()==Acc)
-			{
-				return &accounts[i];
-			}
+    SavingAccount(string n, int Acc, double bal)
+        : BankAccount(n, Acc, bal) {}
 
-		}
-	}
-
+    void withdraw(double amount) override {
+        if (balance > amount) {
+            balance -= amount;
+            cout << "\t\t--Withdrawal successful--";
+        } else {
+            cout << "\t\t--Insufficient balance--";
+        }
+    }
 };
-int main()
-{
-	Bankmanagement bank;
-	int choice;
-	char option;
-	do {
-		system("clear");
-		cout<<"\t\t::BANK MANAGEMENT SYSTEM::"<<endl;
-		cout<<"\t\t\tMAIN MENU"<<endl;
-		cout<<"\t\t\t 1.Create account"<<endl;
-		cout<<"\t\t\t 2.Show all account"<<endl;
-		cout<<"\t\t\t 3.Search account"<<endl;
-		cout<<"\t\t\t 4.Deposit money"<<endl;
-		cout<<"\t\t\t 5.Withdrawal money"<<endl;
-		cout<<"\t\t\t 6.Exit"<<endl;
-		cout<<"\t\t---------------------------------"<<endl;
-		cout<<"\t\tEnter your choice :";
-		cin>>choice;
 
-		switch(choice)
-		{
-		case 1: {
-			string name;
-			int Accnumber;
-			double balance;
-			cout<<"\tEnter Name:";
-			cin>>name;
-			cout<<"\tEnter account number:";
-			cin>>Accnumber;
-			cout<<"\tEnter initial deposit:";
-			cin>>balance;
-			bank.addaccount(name,Accnumber,balance);
-			cout<<"\t\tAccount created successfully..........."<<endl;
-			break;
-		}
+// Derived class for Current Account
+class CurrentAccount : public BankAccount {
+public:
+    CurrentAccount(string n, int Acc, double bal)
+        : BankAccount(n, Acc, bal) {}
 
-		case 2: {
-			bank.Showallacc();
-			break;
-		}
+    void withdraw(double amount) override {
+        // Current accounts can overdraft, so there's no balance check here
+        balance -= amount;
+        cout << "\t\t--Withdrawal successful--";
+    }
+};
 
-		case 3: {
-			int Accnumber;
-			cout<<"\t\tEnter account number:";
-			cin>>Accnumber;
-			bank.SearchACC(Accnumber);
-		}
-		case 4: {
-			double dep;
-			int acc;
-			cout<<"\t\tAccount number to deposit:";
-			cin>>acc;
-			Bankaccount* account=bank.findaccount(acc);
-			if (account!=NULL)
-			{	cout<<"\t\tEnter the amount to deposit:";
-				cin>>dep;
-				account->deposit(dep);
-				cout<<"\t\tAmount deposited successfully---";
-			}
-			else {
-				cout<<"\t\tAccount not found--"<<endl;
+// Class to manage the bank accounts
+class BankManagement {
+private:
+    vector<BankAccount*> accounts;
 
-			}
-			break;
-		}
-		case 5:
-		{
-			double Withdrawal;
-			int acc;
-			cout<<"\t\tAccount number to Withdraw:";
-			cin>>acc;
-			Bankaccount* account=bank.findaccount(acc);
-			if (account!=NULL)
-			{	cout<<"\t\tEnter the amount to Withdraw:";
-				cin>>Withdrawal;
-				account->withdraw(Withdrawal);
-				cout<<"\t\tAmount Withdrawal successfully---";
-			}
-			else {
-				cout<<"\t\tAccount not found--"<<endl;
+public:
+    ~BankManagement() {
+        for (auto acc : accounts) {
+            delete acc;
+        }
+    }
 
-			}
-			break;
-		}
-		case 6:
-		{
+    void addAccount(string name, int Accnumber, double balance, bool isSaving) {
+        BankAccount* account;
+        if (isSaving) {
+            account = new SavingAccount(name, Accnumber, balance);
+        } else {
+            account = new CurrentAccount(name, Accnumber, balance);
+        }
+        accounts.push_back(account);
+    }
 
-			cout << "\t\tThank you for using the Bank Management System!" << endl;
-			cout << "\t\tHave a great day!" << endl;
-			return 0;
-			break;
-		}
+    void showAllAccounts() const {
+        cout << "\t\tAll accounts:" << endl;
+        for (auto acc : accounts) {
+            cout << "\t\tName: " << acc->getname() << endl;
+            cout << "\t\tAccount number: " << acc->getAccnumber() << endl;
+            cout << "\t\tAccount balance: " << acc->getbalance() << endl;
+            cout << "\t--------------------------------" << endl;
+        }
+    }
 
-		}
-		cout<<endl;
-		cout<<"\t\tWhether to continue or exit[Yes(Y) or No(N)]?";
-		cin>>option;
-	} while(option=='Y' || option=='y');
+    void searchAccount(int accountnum) const {
+        cout << "\t\tAccount Holder" << endl;
+        for (auto acc : accounts) {
+            if (acc->getAccnumber() == accountnum) {
+                cout << "\t\tName: " << acc->getname() << endl;
+                cout << "\t\tAccount number: " << acc->getAccnumber() << endl;
+                cout << "\t\tAccount balance: " << acc->getbalance() << endl;
+                return;
+            }
+        }
+        cout << "\t\t--No account number available--" << endl;
+    }
 
+    BankAccount* findAccount(int Acc) const {
+        for (auto acc : accounts) {
+            if (acc->getAccnumber() == Acc) {
+                return acc;
+            }
+        }
+        return nullptr;
+    }
+};
+
+int main() {
+    BankManagement bank;
+    int choice;
+    char option;
+
+    do {
+        system("clear");
+        cout << "\t\t::BANK MANAGEMENT SYSTEM::" << endl;
+        cout << "\t\t\tMAIN MENU" << endl;
+        cout << "\t\t\t 1. Create account" << endl;
+        cout << "\t\t\t 2. Show all accounts" << endl;
+        cout << "\t\t\t 3. Search account" << endl;
+        cout << "\t\t\t 4. Deposit money" << endl;
+        cout << "\t\t\t 5. Withdraw money" << endl;
+        cout << "\t\t\t 6. Exit" << endl;
+        cout << "\t\t---------------------------------" << endl;
+        cout << "\t\tEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: {
+            string name;
+            int Accnumber;
+            double balance;
+            bool isSaving;
+            cout << "\tEnter Name: ";
+            cin >> name;
+            cout << "\tEnter account number: ";
+            cin >> Accnumber;
+            cout << "\tEnter initial deposit: ";
+            cin >> balance;
+            cout << "\tIs it a saving account (1 for Yes, 0 for No)? ";
+            cin >> isSaving;
+            bank.addAccount(name, Accnumber, balance, isSaving);
+            cout << "\t\tAccount created successfully..........." << endl;
+            break;
+        }
+        case 2:
+            bank.showAllAccounts();
+            break;
+        case 3: {
+            int Accnumber;
+            cout << "\t\tEnter account number: ";
+            cin >> Accnumber;
+            bank.searchAccount(Accnumber);
+            break;
+        }
+        case 4: {
+            double dep;
+            int acc;
+            cout << "\t\tAccount number to deposit: ";
+            cin >> acc;
+            BankAccount* account = bank.findAccount(acc);
+            if (account != nullptr) {
+                cout << "\t\tEnter the amount to deposit: ";
+                cin >> dep;
+                account->deposit(dep);
+                cout << "\t\tAmount deposited successfully---";
+            } else {
+                cout << "\t\tAccount not found--" << endl;
+            }
+            break;
+        }
+        case 5: {
+            double Withdrawal;
+            int acc;
+            cout << "\t\tAccount number to withdraw: ";
+            cin >> acc;
+            BankAccount* account = bank.findAccount(acc);
+            if (account != nullptr) {
+                cout << "\t\tEnter the amount to withdraw: ";
+                cin >> Withdrawal;
+                account->withdraw(Withdrawal);
+                cout << "\t\tAmount withdrawn successfully---";
+            } else {
+                cout << "\t\tAccount not found--" << endl;
+            }
+            break;
+        }
+        case 6:
+            cout << "\t\tThank you for using the Bank Management System!" << endl;
+            cout << "\t\tHave a great day!" << endl;
+            return 0;
+        default:
+            cout << "\t\tInvalid choice, please try again." << endl;
+        }
+
+        cout << endl;
+        cout << "\t\tWhether to continue or exit [Yes(Y) or No(N)]? ";
+        cin >> option;
+    } while (option == 'Y' || option == 'y');
+
+    return 0;
 }
-
-
